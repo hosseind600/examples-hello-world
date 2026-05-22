@@ -1,5 +1,36 @@
-import { serveFile } from "jsr:@std/http/file-server";
+Deno.serve(async (req) => {
 
-Deno.serve((req: Request) => {
-    return serveFile(req, "./index.html");
+    const body = await req.json();
+
+    const target = body.url;
+    const method = body.method || "GET";
+
+    const headers = body.headers || {};
+
+    let response;
+
+    try {
+
+        response = await fetch(target, {
+            method,
+            headers
+        });
+
+        const text = await response.text();
+
+        return Response.json({
+            ok: true,
+            status: response.status,
+            body: text
+        });
+
+    } catch (err) {
+
+        return Response.json({
+            ok: false,
+            error: err.toString()
+        });
+
+    }
+
 });
